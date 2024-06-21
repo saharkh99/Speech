@@ -7,6 +7,7 @@ from langchain_elasticsearch import ElasticsearchStore
 from langchain_experimental.graph_transformers import LLMGraphTransformer
 from langchain_openai import ChatOpenAI
 from langchain.graphs import Neo4jGraph
+from langchain_community.embeddings import CohereEmbeddings
 from langchain_pinecone import PineconeVectorStore
 from pinecone import Pinecone, ServerlessSpec
 import time
@@ -49,7 +50,7 @@ def elastic_vct_search(splits):
     return es_store
 
 def pinecone_vct_db(splits):
-    
+    # embedding = CohereEmbeddings()
     embeddings = OpenAIEmbeddings()
     pc = Pinecone(api_key="pinecone_api_key")
     index_name = "langchain-index"  # change if desired
