@@ -87,7 +87,6 @@ def step_back_prompting(question):
 
 
 if __name__ == "__main__":
-    os.environ['OPENAI_API_KEY'] = 'sk-proj-b8Mmk1vTSNc5OXEaNbjBT3BlbkFJ93XqhmviHmYSDomDKwg2'
     
     questions = generate_alternative_queries("how is donald trump?")
 
