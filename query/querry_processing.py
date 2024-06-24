@@ -26,14 +26,11 @@ def generate_alternative_queries(question):
     the user overcome some of the limitations of the distance-based similarity search.
     Provide these alternative questions separated by newlines. Original question: {question}"""
     
-    # Create the prompt using the template
     prompt_perspectives = ChatPromptTemplate.from_template(template.format(question=question))
     
-    # Use the AI model to generate the responses
     ai_model = ChatOpenAI(temperature=0)
     generated_output = ai_model(prompt_perspectives)
     
-    # Parse the output to split by newlines and return as a list
     parsed_output = StrOutputParser()(generated_output)
     alternative_queries = parsed_output.split("\n")
     
@@ -60,7 +57,6 @@ def step_back_prompting(question):
         "output": "what can a SpaceX rocket do?",
     }
 ]
-# We now transform these to example messages
     example_prompt = ChatPromptTemplate.from_messages(
         [
             ("human", "{input}"),
@@ -85,3 +81,6 @@ def step_back_prompting(question):
     results = question_gen.invoke({"question": question})
     return results
 
+
+if __name__ == "__main__":
+    print(generate_alternative_queries("how is donald trump?"))
