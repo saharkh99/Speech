@@ -23,5 +23,4 @@ def flashrank(retriever,query):
 
 
 
-
     

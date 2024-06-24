@@ -10,7 +10,9 @@ from langchain.graphs import Neo4jGraph
 from langchain_community.embeddings import CohereEmbeddings
 from langchain_pinecone import PineconeVectorStore
 from pinecone import Pinecone, ServerlessSpec
+from langchain_core.documents import Document
 import time
+from src import utils
 
 
 def splitting_text_recursive(documents, chunk_size=1000, chunk_overlap=200, add_start_index=True):
@@ -25,7 +27,7 @@ def splitting_text_recursive(documents, chunk_size=1000, chunk_overlap=200, add_
 
 
 def splitting_text_semantic(documents):
-    text_splitter = SemanticChunker(OpenAIEmbeddings())
+    text_splitter = SemanticChunker(utils.set_open_ai_embedding())
     semantic_chunks = text_splitter.create_documents([d.page_content for d in documents])
     return semantic_chunks
 
@@ -39,11 +41,13 @@ def graph_vectorization(documents):
 
 def vector_chroma(splits):
     vectorstore = Chroma.from_documents(documents=splits,
-                                        embedding=OpenAIEmbeddings())
+                                        embedding=utils.set_open_ai_embedding())
     return vectorstore
 
 def elastic_vct_search(splits):
     es_store = ElasticsearchStore(
+        es_url="http://localhost:9200",
+        index_name="test_index",
         strategy=ElasticsearchStore.SparseVectorRetrievalStrategy(model_id=".elser_model_2"),
     ),
     es_store.add_texts(splits)
@@ -53,7 +57,7 @@ def pinecone_vct_db(splits):
     # embedding = CohereEmbeddings()
     embeddings = OpenAIEmbeddings()
     pc = Pinecone(api_key="pinecone_api_key")
-    index_name = "langchain-index"  # change if desired
+    index_name = "speech-index" 
     existing_indexes = [index_info["name"] for index_info in pc.list_indexes()]
     if index_name not in existing_indexes:
         pc.create_index(
@@ -66,9 +70,15 @@ def pinecone_vct_db(splits):
             time.sleep(1)
 
     index = pc.Index(index_name)
-    docsearch = PineconeVectorStore.from_documents(splits, embeddings, index_name=index_name)
+    docsearch = PineconeVectorStore.from_documents(splits, embeddings, index_name=index)
     return docsearch
 
 
-
+if __name__ == "__main__":
+     document = """
+    "If we look to the laws, they afford equal justice to all in their private differences...
+    if a man is able to serve the state, he is not hindered by the obscurity of his condition. The freedom we enjoy in our government extends also to our ordinary life.
+    There, far from exercising a jealous surveillance over each other, we do not feel called upon to be angry with our neighbour for doing what he likes..."[15] These lines form the roots of the famous phrase "equal justice under law." The liberality of which Pericles spoke also extended to Athens' foreign policy: "We throw open our city to the world, and never by alien acts exclude foreigners from any opportunity of learning or observing, although the eyes of an enemy may occasionally profit by our liberality..."[16]
+    """
+     print(vector_chroma([Document(page_content=document)]))
 
