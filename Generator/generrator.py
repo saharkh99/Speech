@@ -9,7 +9,6 @@ class RAGGenerator:
         self.docs = docs
         self.openai_api_key = openai_api_key
         self.memory_file = memory_file
-        # Initialize the language model with OpenAI
         # model_name=model_name
         self.llm = OpenAI(api_key=openai_api_key, temperature=0)
         self.memory = ConversationBufferMemory(max_size=2000) 
@@ -30,7 +29,6 @@ class RAGGenerator:
             "Assistant's Answer:"
         )
         
-        # Format the prompt with the provided context, history, and question
         formatted_prompt = template.format_prompt(
             context=context,
             history=conversation_history,

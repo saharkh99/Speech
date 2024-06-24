@@ -2,10 +2,14 @@
 from langchain.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 from langchain_openai import ChatOpenAI
-from langchain.chat_models import ChatOpenAI
+# from langchain.chat_models import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate, FewShotChatMessagePromptTemplate
 from langchain.schema.output_parser import StrOutputParser
 from langchain.schema.runnable import RunnableLambda
+import os
+from langchain.load import dumps, loads
+
+
 
 # Multi Query: Different Perspectives
 def generate_alternative_queries(question):
@@ -26,15 +30,15 @@ def generate_alternative_queries(question):
     the user overcome some of the limitations of the distance-based similarity search.
     Provide these alternative questions separated by newlines. Original question: {question}"""
     
-    prompt_perspectives = ChatPromptTemplate.from_template(template.format(question=question))
-    
-    ai_model = ChatOpenAI(temperature=0)
-    generated_output = ai_model(prompt_perspectives)
-    
-    parsed_output = StrOutputParser()(generated_output)
-    alternative_queries = parsed_output.split("\n")
-    
-    return alternative_queries
+    prompt_perspectives = ChatPromptTemplate.from_template(template)
+    generate_queries = (
+    prompt_perspectives
+    | ChatOpenAI(temperature=0)
+    | StrOutputParser()
+    | (lambda x: x.split("\n"))
+)
+    questions = generate_queries.invoke({"question":question})
+    return questions
 
 
 def step_back_prompting(question):
@@ -83,4 +87,7 @@ def step_back_prompting(question):
 
 
 if __name__ == "__main__":
-    print(generate_alternative_queries("how is donald trump?"))
+    os.environ['OPENAI_API_KEY'] = 'sk-proj-b8Mmk1vTSNc5OXEaNbjBT3BlbkFJ93XqhmviHmYSDomDKwg2'
+    
+    questions = generate_alternative_queries("how is donald trump?")
+
